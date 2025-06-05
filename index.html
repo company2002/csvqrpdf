@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONVERSOR DE PLANILHAS DE EXCEL PRA CSV</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --background: #F5F7FA;
+            --surface: #FFFFFF;
+            --text: #1F2937;
+            --border: #E5E7EB;
+        }
+
+        [data-theme="dark"] {
+            --primary: #6366F1;
+            --primary-hover: #4F46E5;
+            --background: #111827;
+            --surface: #1F2937;
+            --text: #F9FAFB;
+            --border: #374151;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .main-content {
+            max-width: 95%; /* Aumentar largura máxima do conteúdo */
+            width: 95%;
+            margin: 0 auto;
+            padding: 2.5rem;
+            background-color: var(--surface);
+            position: relative;
+            z-index: 1;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .title-section {
+            text-align: center;
+            background-color: transparent;
+            padding: 1.5rem 0 2rem 0;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .title-section h1 {
+            font-size: 2.5rem;
+            color: #1F2937;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }        .header-banner {
+            background-color: #004AAD;
+            width: 100%;
+            padding: 1rem 0;
+            margin-bottom: 0;
+        }
+
+        .logo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            gap: 1rem;
+        }
+
+        .logo-container img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }        .banner-btn {
+            background-color: white;
+            color: #004AAD;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner-btn:hover {
+            background-color: transparent;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .logo-container {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .buttons-container {
+                order: 2;
+                width: 100%;
+            }
+
+            .banner-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 2px dashed #E5E7EB;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--primary);
+        }        .excel-view {
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            max-height: 600px;
+            position: relative;
+            background: var(--surface);
+            color: var(--text);
+            width: 100%;
+        }        .excel-view table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+        .excel-view th, .excel-view td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid var(--border);
+            min-width: 100px;
+            max-width: none;
+            white-space: nowrap;
+            overflow: visible;
+        }
+
+        .excel-view td[data-field="cep"] {
+            min-width: 100px;
+            font-family: monospace;
+        }
+
+        .excel-view th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .excel-view tr:nth-child(even) {
+            background-color: var(--background);
+        }
+
+        .excel-view tr:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        /* Personalização da barra de rolagem */
+        .excel-view::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        .excel-view::-webkit-scrollbar-track {
+            background: var(--background);
+            border-radius: 6px;
+        }
+
+        .excel-view::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 6px;
+            border: 3px solid var(--background);
+        }
+
+        .excel-view::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+
+        .table-container {
+            overflow: auto;
+            max-height: 400px;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.375rem;
+            margin: 1rem 0;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            border: 2px dashed #D1D5DB;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .field-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .select-all-container {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--background);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .checkbox-wrapper:hover {
+            background-color: var(--background);
+            border-color: var(--primary);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked + label {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:disabled + label {
+            color: #6B7280;
+            font-style: italic;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-radius: 0.25rem;
+            border: 2px solid #D1D5DB;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .selected-fields-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #F0F9FF;
+            border-radius: 0.5rem;
+            border: 1px solid #BAE6FD;
+            color: #0369A1;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .button-container {
+                justify-content: center;
+            }
+        }
+
+        [role="status"] {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.75rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    </style>
+</head>
+<body>    <header class="header-banner">
+        <div class="logo-container" style="justify-content: space-between; align-items: center;">
+            <img src="https://i.imgur.com/6C6Gmvp.jpeg" alt="Logo ESAP" />
+            <a href="sistema.html" target="_blank" class="banner-btn" style="margin: 0 2rem;">Sistema de Inserção de QR Code em PDF</a>
+            <img src="https://i.imgur.com/6C6Gmvp.jpeg" alt="Logo PGE" />
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="text-3xl font-bold mb-6 title-section">CONVERSOR DE PLANILHAS DE EXCEL PRA CSV</h1>
+
+        <section class="card" aria-labelledby="section-import">
+            <h2 id="section-import" class="text-xl font-semibold mb-4">1. Importar Arquivo Excel</h2>
+            
+            <div class="file-input-container">
+                <label class="file-input-label" for="fileInput">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span>Arraste seu arquivo aqui ou clique para selecionar</span>
+                </label>
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" aria-label="Selecione um arquivo Excel ou CSV">
+            </div>
+            <div id="file-info" class="text-sm text-gray-600" aria-live="polite"></div>
+            
+            <div id="fieldSelection" class="mt-6 hidden" aria-labelledby="field-selection-title">
+                <h3 id="field-selection-title" class="text-lg font-medium mb-4">Selecione os campos para extrair:</h3>
+                
+                <div class="select-all-container mb-4 p-3 bg-gray-50 rounded-lg">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="selectAll" aria-label="Selecionar todos os campos">
+                        <span class="font-medium">Selecionar Todos</span>
+                    </label>
+                </div>
+
+                <div class="field-options" role="group" aria-label="Opções de campos">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="nome_completo" checked disabled id="field-nome">
+                        <label for="field-nome">Nome Completo (Obrigatório)</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="turma" checked disabled id="field-turma">
+                        <label for="field-turma">Turma (Obrigatório)</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="matricula_esap" checked disabled id="field-matricula">
+                        <label for="field-matricula">Matrícula ESAP (Obrigatório)</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="email" id="field-email">
+                        <label for="field-email">Email</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="cpf" id="field-cpf">
+                        <label for="field-cpf">CPF</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="sexo" id="field-sexo">
+                        <label for="field-sexo">Sexo</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="nomepai" id="field-nomepai">
+                        <label for="field-nomepai">Nome do Pai</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="nomemae" id="field-nomemae">
+                        <label for="field-nomemae">Nome da Mãe</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="dtnasc" id="field-dtnasc">
+                        <label for="field-dtnasc">Data de Nascimento</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="celular" id="field-celular">
+                        <label for="field-celular">Celular</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="docidentif" id="field-docidentif">
+                        <label for="field-docidentif">Documento de Identificação</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="orgexpident" id="field-orgexpident">
+                        <label for="field-orgexpident">Órgão Expedidor</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="dataexpedicao" id="field-dataexpedicao">
+                        <label for="field-dataexpedicao">Data de Expedição</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="endereco" id="field-endereco">
+                        <label for="field-endereco">Endereço</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="bairro" id="field-bairro">
+                        <label for="field-bairro">Bairro</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="cidade" id="field-cidade">
+                        <label for="field-cidade">Cidade</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="uf" id="field-uf">
+                        <label for="field-uf">UF</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" value="cep" id="field-cep">
+                        <label for="field-cep">CEP</label>
+                    </div>
+                </div>
+
+                <button id="readBtn" class="mt-6" disabled aria-label="Ler arquivo e processar dados">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    </svg>
+                    Processar Arquivo
+                </button>
+            </div>
+        </section>
+        
+        <section class="card hide" id="originalDataContainer" aria-labelledby="section-originais">
+            <h2 id="section-originais" class="text-xl font-semibold mb-4">2. Dados Originais</h2>
+              <div class="excel-view">
+                <div id="tableContainer"></div>
+            </div>
+            
+            <div class="button-container">
+                <button id="transformBtn" aria-label="Transformar dados originais em novos campos">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9 7 9-7M4 11h16" />
+                    </svg>
+                    Transformar
+                </button>
+            </div>
+        </section>
+        
+        <section class="card hide" id="transformedDataContainer" aria-labelledby="section-transformados">
+            <h2 id="section-transformados" class="text-xl font-semibold mb-4">3. Dados Transformados</h2>
+              <div class="excel-view">
+                <div id="transformedTableContainer"></div>
+            </div>
+            
+            <div class="button-container">                
+                <button id="downloadBtn" aria-label="Baixar arquivo para Moodle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9 7 9-7M4 11h16" />
+                    </svg>
+                    Moodle CSV
+                </button>
+                <button id="backBtn" aria-label="Voltar para dados originais">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l-5 5 5 5M6 12h15" />
+                    </svg>
+                    Voltar
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema claro/escuro">
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+    </button>
+
+    <div id="notifications" role="status" aria-live="polite"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = themeToggle.querySelector('.sun-icon');
+        const moonIcon = themeToggle.querySelector('.moon-icon');
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+        });
+
+        function updateThemeIcons(theme) {
+            if (theme === 'dark') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        }
+
+        // Classe utilitária com funções auxiliares para notificações, formatação de dados, conversão para CSV e criação de tabelas
+        class Utils {
+            /**
+             * Exibe uma notificação na tela para o usuário.
+             * @param {string} message - Mensagem a ser exibida.
+             * @param {string} type - Tipo da notificação ('success' ou 'error').
+             */
+            static showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type}`;
+                notification.textContent = message;
+                notification.setAttribute('role', 'alert');
+                const notificationsContainer = document.getElementById('notifications');
+                notificationsContainer.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+            /**
+             * Formata datas de diferentes formatos para o padrão YYYY-MM-DD.
+             * @param {string|number} data - Data a ser formatada.
+             * @returns {string} Data formatada.
+             */
+            static formatarData(data) {
+                if (!data) return '';
+                
+                try {
+                    let dataFormatada = '';
+                    
+                    // Caso seja número Excel
+                    if (typeof data === 'number') {
+                        const date = new Date(Math.round((data - 25569) * 86400 * 1000));
+                        dataFormatada = date.toISOString().slice(0, 10);
+                    } else {
+                        // Caso seja string
+                        const str = String(data).trim();
+
+                        // DD/MM/YYYY ou DD-MM-YYYY
+                        let match = str.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
+                        if (match) {
+                            const [, dia, mes, ano] = match;
+                            dataFormatada = `${ano}-${mes}-${dia}`;
+                        } else {
+                            // YYYY-MM-DD ou YYYY/MM/DD
+                            match = str.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})$/);
+                            if (match) {
+                                const [, ano, mes, dia] = match;
+                                dataFormatada = `${ano}-${mes}-${dia}`;
+                            } else {
+                                // Tenta parsear datas comuns
+                                const dataObj = new Date(str);
+                                if (!isNaN(dataObj.getTime())) {
+                                    dataFormatada = dataObj.toISOString().slice(0, 10);
+                                } else {
+                                    return str;
+                                }
+                            }
+                        }
+                    }
+
+                    // Retorna a data formatada sem os caracteres especiais
+                    return dataFormatada;
+                } catch (error) {
+                    return data;
+                }
+            }
+            /**
+             * Converte um array de arrays em uma string CSV, tratando datas e caracteres especiais.
+             * @param {Array} data - Dados a serem convertidos.
+             * @returns {string} CSV formatado.
+             */
+            static convertToCSV(data) {
+                // Regex para identificar datas no formato YYYY-MM-DD
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                return data.map(row => {
+                    return row.map(cell => {
+                        const value = String(cell || '').trim();
+                        // Se for data no formato internacional, sempre exporta entre aspas
+                        if (dateRegex.test(value)) {
+                            return '"' + value + '"';
+                        }
+                        if (value.includes(',') || value.includes(';') || value.includes('"')) {
+                            // Escapa aspas duplas duplicando-as
+                            return '"' + value.replace(/"/g, '""') + '"';
+                        }
+                        return value;
+                    }).join(';');
+                }).join('\n');
+            }
+            /**
+             * Cria uma tabela HTML a partir dos dados fornecidos e insere no container especificado.
+             * @param {Array} data - Dados para a tabela.
+             * @param {HTMLElement} container - Elemento onde a tabela será inserida.
+             */
+            static createTable(data, container) {
+                if (!data || data.length === 0) return;
+                const validColumns = data[0].map((_, colIndex) => {
+                    return data.some(row => row[colIndex] && row[colIndex].toString().trim() !== '');
+                });
+                const table = document.createElement('table');
+                table.setAttribute('role', 'table');
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                data[0].forEach((header, index) => {
+                    if (validColumns[index] && header && header.trim() !== '') {
+                        const th = document.createElement('th');
+                        th.textContent = header;
+                        th.setAttribute('scope', 'col');
+                        headerRow.appendChild(th);
+                    }
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                const tbody = document.createElement('tbody');
+                for (let i = 1; i < data.length; i++) {
+                    const row = document.createElement('tr');
+                    data[i].forEach((cell, index) => {
+                        if (validColumns[index] && data[0][index] && data[0][index].trim() !== '') {
+                            const td = document.createElement('td');
+                            td.textContent = cell || '';
+                            if (index === 0) {
+                                td.setAttribute('scope', 'row');
+                            }
+                            row.appendChild(td);
+                        }
+                    });
+                    if (row.children.length > 0) {
+                        tbody.appendChild(row);
+                    }
+                }
+                table.appendChild(tbody);
+                container.innerHTML = '';
+                container.appendChild(table);
+            }
+        }
+
+        // Classe responsável pelo processamento dos arquivos e transformação dos dados
+        class FileProcessor {
+            static FIELD_MAPPINGS = {
+        'nome_completo': {
+            input: ['nome completo', 'nome_completo', 'nome'],
+            firstname: 'firstname',
+            lastname: 'lastname'
+        },
+        'turma': {
+            input: ['turma', 'classe'],
+            output: 'cohort1'
+        },
+        'email': {
+            input: ['email', 'e-mail'],
+            output: 'email'
+        },
+        'cpf': {
+            input: ['cpf'],
+            output: 'profile_field_CPF'
+        },
+        'matricula_esap': {
+            input: ['matricula esap', 'matrícula esap', 'matricula_esap', 'matricula'],
+            output: 'username'
+        },
+        'sexo': {
+            input: ['sexo'],
+            output: 'profile_field_genero'
+        },
+        'nomepai': {
+            input: ['nome do pai', 'pai', 'nomepai', 'NomePai'],
+            output: 'profile_field_Pai'
+        },
+        'nomemae': {
+            input: ['nome da mae', 'mae', 'nomemae', 'Nome Mae'],
+            output: 'profile_field_Mae'
+        },
+        'dtnasc': {
+            input: ['data nascimento', 'data de nascimento', 'dtnasc'],
+            output: 'profile_field_Data'
+        },
+        'celular': {
+            input: ['celular', 'telefone celular'],
+            output: 'profile_field_Telefone'
+        },
+        'docidentif': {
+            input: ['doc de identificacao', 'documento de identificação', 'doc identificacao', 'docidentif', 'registro geral', 'rg', 'identidade'],
+            output: 'profile_field_RegistroCivil'
+        },
+        'orgexpident': {
+            input: ['orgao expedidor', 'org expedidor', 'orgexpident', 'Org Expedidor'],
+            output: 'profile_field_OrgaoEmissor'
+        },
+        'dataexpedicao': {
+            input: ['data expedicao', 'data de expedicao', 'dataexpedicao', 'data emissao', 'data de emissao'],
+            output: 'profile_field_DataExpedicao'
+        },
+        'endereco': {
+            input: ['endereco', 'endereço'],
+            output: 'profile_field_EnderecoResidencial'
+        },
+        'bairro': {
+            input: ['bairro'],
+            output: 'profile_field_Bairro'
+        },
+        'cidade': {
+            input: ['cidade'],
+            output: 'city'
+        },
+        'uf': {
+            input: ['uf', 'estado'],
+            output: 'profile_field_Estado'
+        },
+        'cep': {
+            input: ['cep'],
+            output: 'profile_field_CEP'
+        }
+    };
+
+            constructor() {
+                this.workbookData = [];
+                this.csvContent = '';
+                this.transformedContent = '';
+                this.selectedFile = null;
+                this.fullData = null;
+            }
+
+            /**
+             * Lê o arquivo selecionado e processa os dados do Excel/CSV.
+             * @param {File} file - Arquivo selecionado pelo usuário.
+             * @returns {Promise<boolean>} Indica sucesso ou falha.
+             */
+            async processFile(file) {
+                try {
+                    const data = await this.readFileAsArrayBuffer(file);
+                    await this.processExcelData(data);
+                    Utils.showNotification('Arquivo processado com sucesso!');
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao processar arquivo:', error);
+                    Utils.showNotification(error.message, 'error');
+                    return false;
+                }
+            }
+
+            /**
+             * Lê o arquivo como ArrayBuffer para processamento posterior.
+             * @param {File} file - Arquivo a ser lido.
+             * @returns {Promise<ArrayBuffer>} Conteúdo do arquivo.
+             */
+            readFileAsArrayBuffer(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            /**
+             * Processa os dados do Excel, converte para array e atualiza a interface.
+             * @param {ArrayBuffer} data - Dados do arquivo.
+             * @returns {boolean}
+             */
+            processExcelData(data) {
+                const workbook = XLSX.read(data, {
+                    type: 'array',
+                    codepage: 65001,
+                    cellDates: true,
+                    dateNF: 'dd/mm/yyyy'
+                });
+
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                let rawData = XLSX.utils.sheet_to_json(worksheet, {
+                    header: 1,
+                    raw: false,
+                    defval: '',
+                    dateNF: 'dd/mm/yyyy'
+                });
+
+                if (rawData.length < 2) {
+                    throw new Error('O arquivo não contém dados suficientes.');
+                }                // Processar dados com validação melhorada
+                this.workbookData = this.processRawData(rawData);
+                this.csvContent = Utils.convertToCSV(this.workbookData);
+                
+                // Atualizar interface
+                Utils.createTable(this.workbookData, document.getElementById('tableContainer'));
+                
+                return true;
+            }
+            /**
+             * Processa os dados brutos do Excel, filtrando e formatando conforme campos selecionados.
+             * @param {Array} rawData - Dados brutos da planilha.
+             * @returns {Array} Dados processados.
+             */
+            processRawData(rawData) {
+                // Primeiro, vamos pegar os campos selecionados e filtrar campos vazios
+                const selectedFields = Array.from(document.querySelectorAll('#fieldSelection .field-options input[type="checkbox"]:checked'))
+                    .map(cb => cb.value)
+                    .filter(value => value && value.trim() !== '');
+
+                // Preservar os cabeçalhos originais e criar um mapeamento para minúsculas
+                const originalHeaders = rawData[0].map(h => h ? h.trim() : '').filter(h => h !== '');
+                const headerMap = originalHeaders.map((h, index) => ({
+                    original: h,
+                    lower: String(h).toLowerCase().trim(),
+                    index: index
+                }));
+
+                // Mapeamento de campos com seus possíveis nomes
+                const fieldMappings = {
+                    'nome_completo': ['nome completo', 'nome_completo', 'nome'],
+                    'turma': ['turma', 'classe'],
+                    'matricula_esap': ['matricula esap', 'matrícula esap', 'matricula_esap', 'matricula'],
+                    'email': ['email', 'e-mail'],
+                    'cpf': ['cpf'],
+                    'sexo': ['sexo'],
+                    'nomepai': ['nome do pai', 'pai', 'nomepai'],
+                    'nomemae': ['nome da mae', 'mae', 'nome mae'],
+                    'dtnasc': ['data nascimento', 'data de nascimento', 'dtnasc'],
+                    'celular': ['celular', 'telefone celular'],
+                    'docidentif': ['doc de identificacao', 'documento identificacao', 'doc identificacao', 'docidentif'],
+                    'orgexpident': ['orgao expedidor', 'Org Expedidor', 'org expedidor', 'orgexpident'],
+                    'dataexpedicao': ['data expedicao', 'data de expedicao', 'dataexpedicao'],
+                    'endereco': ['endereco', 'endereço'],
+                    'bairro': ['bairro'],
+                    'cidade': ['cidade'],
+                    'uf': ['uf', 'estado'],
+                    'cep': ['cep']
+                };
+
+            // Função para remover acentos de uma string
+            function removeAccents(str) {
+                return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // Função auxiliar para encontrar o índice da coluna
+            function findColumnIndex(fieldName) {
+                const possibleNames = fieldMappings[fieldName] || [fieldName];
+                const headerInfo = headerMap.find(h => 
+                    possibleNames.some(name => removeAccents(h.lower).includes(removeAccents(name)))
+                );
+                return headerInfo ? headerInfo.index : -1;
+            }
+
+                // Processar cada linha
+                const processedData = rawData.map((row, rowIndex) => {
+                    if (rowIndex === 0) {
+                        // Retornar cabeçalhos originais selecionados
+                        const selectedHeaderIndices = selectedFields.map(field => findColumnIndex(field));
+                        return selectedHeaderIndices.map(index => originalHeaders[index]);
+                    }
+
+                    return selectedFields.map(field => {
+                        const columnIndex = findColumnIndex(field);
+                        if (columnIndex === -1) return '';
+
+                        let value = row[columnIndex];
+                        if (value === undefined || value === null) return '';
+                        value = String(value).trim();                        switch (field) {
+                            case 'dtnasc':
+                            case 'dataexpedicao':
+                                if (!value) return '';
+                                const formatedDate = Utils.formatarData(value);
+                                return formatedDate || value; // Retorna o valor original se não conseguir formatar
+                            
+                            case 'sexo':
+                                if (!value) return '';
+                                value = value.toUpperCase();
+                                return value === 'F' ? 'Feminino' : 
+                                       value === 'M' ? 'Masculino' : value;
+                            
+                            case 'cep':
+                                if (!value) return '';
+                                // Remover todos os caracteres não numéricos
+                                const cepLimpo = value.replace(/\D/g, '');
+                                if (cepLimpo.length === 8) {
+                                    return cepLimpo.replace(/(\d{5})(\d{3})/, '$1-$2');
+                                }
+                                return value;
+                            
+                            case 'uf':
+                                return value.toUpperCase();
+                            
+                            case 'celular':
+                                if (!value) return '';
+                                // Manter apenas números e formatar
+                                const numeros = value.replace(/\D/g, '');
+                                if (numeros.length === 11) {
+                                    return `(${numeros.substr(0,2)}) ${numeros.substr(2,5)}-${numeros.substr(7)}`;
+                                }
+                                return value;
+                            
+                            default:
+                                return value;
+                        }
+                    });
+                });
+
+                return processedData;
+            }
+
+            /**
+             * Formata o campo sexo para 'Masculino' ou 'Feminino'.
+             * @param {string} value - Valor do campo sexo.
+             * @returns {string}
+             */
+            static formatSexo(value) {
+                if (!value) return '';
+                const s = String(value).trim().toUpperCase();
+                return s === 'F' ? 'Feminino' : s === 'M' ? 'Masculino' : value;
+            }
+            /**
+             * Formata o telefone para o padrão (XX) XXXXX-XXXX.
+             * @param {string} value - Telefone.
+             * @returns {string}
+             */
+            static formatTelefone(value) {
+                if (!value) return '';
+                const numeros = String(value).replace(/\D/g, '');
+                if (numeros.length === 11) {
+                    return `(${numeros.substr(0,2)}) ${numeros.substr(2,5)}-${numeros.substr(7)}`;
+                }
+                return value;
+            }
+            /**
+             * Formata o CEP para o padrão XXXXX-XXX.
+             * @param {string} value - CEP.
+             * @returns {string}
+             */
+            static formatCEP(value) {
+                if (!value) return '';
+                const numeros = String(value).replace(/\D/g, '');
+                if (numeros.length === 8) {
+                    return `${numeros.substr(0,5)}-${numeros.substr(5)}`;
+                }
+                return value;
+            }
+            /**
+             * Transforma os dados processados em formato compatível com o Moodle, gera senhas e monta o CSV final.
+             * @returns {boolean}
+             */
+            transformData() {
+                if (!this.workbookData || this.workbookData.length < 2) {
+                    throw new Error('Não há dados para transformar.');
+                }
+
+                // Modificar para usar apenas os campos selecionados
+                const selectedFields = Array.from(document.querySelectorAll('#fieldSelection .field-options input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+
+                // Criar headers apenas com campos selecionados
+                const csvHeaders = [];
+                if(selectedFields.includes('nome_completo')) {
+                    csvHeaders.push('firstname', 'lastname');
+                }
+                if(selectedFields.includes('matricula_esap')) csvHeaders.push('username');
+                if(selectedFields.includes('turma')) csvHeaders.push('cohort1');
+                if(selectedFields.includes('email')) csvHeaders.push('email');
+                if(selectedFields.includes('cpf')) csvHeaders.push('profile_field_CPF');
+                if(selectedFields.includes('sexo')) csvHeaders.push('profile_field_genero');
+                if(selectedFields.includes('nomepai')) csvHeaders.push('profile_field_Pai');
+                if(selectedFields.includes('nomemae')) csvHeaders.push('profile_field_Mae');
+                if(selectedFields.includes('dtnasc')) csvHeaders.push('profile_field_Data');
+                if(selectedFields.includes('celular')) csvHeaders.push('profile_field_Telefone');
+                if(selectedFields.includes('docidentif')) csvHeaders.push('profile_field_RegistroCivil');
+                if(selectedFields.includes('orgexpident')) csvHeaders.push('profile_field_OrgaoEmissor');
+                if(selectedFields.includes('dataexpedicao')) csvHeaders.push('profile_field_DataExpedicao');
+                if(selectedFields.includes('endereco')) csvHeaders.push('profile_field_EnderecoResidencial');
+                if(selectedFields.includes('bairro')) csvHeaders.push('profile_field_Bairro');
+                if(selectedFields.includes('cidade')) csvHeaders.push('city');
+                if(selectedFields.includes('uf')) csvHeaders.push('profile_field_Estado');
+                if(selectedFields.includes('cep')) csvHeaders.push('profile_field_CEP');
+                // Adiciona a coluna Password ao final
+                csvHeaders.push('Password');
+
+                const headers = this.workbookData[0].map(h => h ? h.toLowerCase().trim() : '');
+                // Encontrar índices das colunas na planilha original usando método centralizado
+                const indices = this.getColumnIndices(headers);
+
+                // Verificar campos obrigatórios
+                if (indices.matricula === -1 || indices.turma === -1 || indices.nome === -1) {
+                    throw new Error('Campos obrigatórios não encontrados (Nome Completo, Matrícula ESAP e Turma)');
+                }
+
+                const csvRows = [csvHeaders];
+                const generatedPasswords = new Set();
+
+                // Função para gerar senha única
+                function gerarSenhaUnica() {
+                    const simbolos = ['@', '#', '$', '%', '&'];
+                    const letrasMaiusculas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const letrasMinusculas = 'abcdefghijklmnopqrstuvwxyz';
+                    let senha = '';
+                    let tentativa = 0;
+                    do {
+                        const simbolo = simbolos[Math.floor(Math.random() * simbolos.length)];
+                        const maiuscula = letrasMaiusculas[Math.floor(Math.random() * letrasMaiusculas.length)];
+                        let minusculas = '';
+                        for (let i = 0; i < 3; i++) {
+                            minusculas += letrasMinusculas[Math.floor(Math.random() * letrasMinusculas.length)];
+                        }
+                        let numeros = '';
+                        for (let i = 0; i < 3; i++) {
+                            numeros += Math.floor(Math.random() * 10);
+                        }
+                        senha = simbolo + maiuscula + minusculas + numeros;
+                        tentativa++;
+                        // Evita loop infinito em casos extremos
+                        if (tentativa > 1000) break;
+                    } while (generatedPasswords.has(senha));
+                    generatedPasswords.add(senha);
+                    return senha;
+                }
+
+                // Processar cada linha
+                for (let i = 1; i < this.workbookData.length; i++) {
+                    const row = this.workbookData[i];
+                    // Pular linhas sem matrícula ou nome
+                    if (!row[indices.matricula] || !row[indices.nome]) continue;
+
+                    // Separar nome em firstname e lastname
+                    let firstname = '', lastname = '';
+                    if (indices.nome !== -1 && row[indices.nome]) {
+                        const nomeParts = String(row[indices.nome]).trim().split(' ');
+                        firstname = nomeParts[0];
+                        lastname = nomeParts.slice(1).join(' ');
+                    }
+
+                    // Formatar datas no padrão YYYY/MM/DD
+                    const dtnasc = indices.dtnasc !== -1 ? 
+        Utils.formatarData(row[indices.dtnasc]) : '';
+                    const dtexp = indices.dtexp !== -1 ? 
+        Utils.formatarData(row[indices.dtexp]) : '';
+
+                    // Formatar telefone
+                    let telefone = '';
+                    if (indices.celular !== -1 && row[indices.celular]) {
+                        const num = String(row[indices.celular]).replace(/\D/g, '');
+                        telefone = num.length === 11 ? 
+                            `(${num.substr(0,2)}) ${num.substr(2,5)}-${num.substr(7)}` : 
+                            row[indices.celular];
+                    }
+
+                    // Formatar CEP
+                    let cep = '';
+                    if (indices.cep !== -1 && row[indices.cep]) {
+                        const num = String(row[indices.cep]).replace(/\D/g, '');
+                        cep = num.length === 8 ? 
+                            `${num.substr(0,5)}-${num.substr(5)}` : 
+                            row[indices.cep];
+                    }
+
+                    // Formatar sexo
+                    let sexo = '';
+                    if (indices.sexo !== -1 && row[indices.sexo]) {
+                        const s = String(row[indices.sexo]).trim().toUpperCase();
+                        sexo = s === 'F' ? 'Feminino' : s === 'M' ? 'Masculino' : row[indices.sexo];
+                    }
+
+                    // Criar array apenas com campos selecionados
+                    const csvRow = [];
+                    if(selectedFields.includes('nome_completo')) {
+                        csvRow.push(firstname, lastname);
+                    }
+                    if(selectedFields.includes('matricula_esap')) csvRow.push(row[indices.matricula] || '');
+                    if(selectedFields.includes('turma')) csvRow.push(row[indices.turma] || '');
+                    if(selectedFields.includes('email')) csvRow.push(row[indices.email] || '');
+                    if(selectedFields.includes('cpf')) csvRow.push(row[indices.cpf] || '');
+                    if(selectedFields.includes('sexo')) csvRow.push(sexo);
+                    if(selectedFields.includes('nomepai')) csvRow.push(row[indices.pai] || '');
+                    if(selectedFields.includes('nomemae')) csvRow.push(row[indices.mae] || '');
+                    if(selectedFields.includes('dtnasc')) csvRow.push(dtnasc);
+                    if(selectedFields.includes('celular')) csvRow.push(telefone);
+                    if(selectedFields.includes('docidentif')) csvRow.push(row[indices.docidentif] || '');
+                    if(selectedFields.includes('orgexpident')) csvRow.push(row[indices.orgexp] || '');
+                    if(selectedFields.includes('dataexpedicao')) csvRow.push(dtexp);
+                    if(selectedFields.includes('endereco')) csvRow.push(row[indices.endereco] || '');
+                    if(selectedFields.includes('bairro')) csvRow.push(row[indices.bairro] || '');
+                    if(selectedFields.includes('cidade')) csvRow.push(row[indices.cidade] || '');
+                    if(selectedFields.includes('uf')) csvRow.push(row[indices.uf] || '');
+                    if(selectedFields.includes('cep')) csvRow.push(cep);
+                    // Adiciona a senha gerada ao final da linha
+                    csvRow.push(gerarSenhaUnica());
+
+                    csvRows.push(csvRow);
+                }
+
+                this.transformedContent = Utils.convertToCSV(csvRows);
+                Utils.createTable(csvRows, document.getElementById('transformedTableContainer'));
+                document.getElementById('originalDataContainer').classList.add('hide');
+                document.getElementById('transformedDataContainer').classList.remove('hide');
+                return true;
+            }
+
+            /**
+             * Retorna os índices das colunas relevantes na planilha, baseando-se nos cabeçalhos.
+             * @param {Array} headers - Lista de cabeçalhos em minúsculo.
+             * @returns {Object} Índices das colunas.
+             */
+            getColumnIndices(headers) {
+                return {
+                    nome: headers.findIndex(h => h.includes('nome completo') || h === 'nome'),
+                    turma: headers.findIndex(h => h.includes('turma') || h === 'classe'),
+                    email: headers.findIndex(h => h.includes('email') || h === 'e-mail'),
+                    cpf: headers.findIndex(h => h.includes('cpf')),
+                    matricula: headers.findIndex(h => h.includes('matricula esap') || h.includes('matrícula') || h === 'matricula'),
+                    sexo: headers.findIndex(h => h === 'sexo'),
+                    pai: headers.findIndex(h => h.includes('nome do pai') || h === 'pai' || h === 'nomepai' || h === 'NomePai'),
+                    mae: headers.findIndex(h => h.includes('nome da mae') || h === 'mãe' || h === 'mae' || h === 'nome mae' || h === 'Nome Mae'),
+                    dtnasc: headers.findIndex(h => h.includes('data nascimento') || h.includes('data de nascimento')),
+                    celular: headers.findIndex(h => h === 'celular' || h.includes('telefone')),
+                    docidentif:  headers.findIndex(h => h.includes('doc de identificacao') || h === 'doc de identificação'),
+                    orgexp: headers.findIndex(h => h.includes('orgao expedidor') || h.includes('órgão expedidor') || h.includes('org expedidor') || h === 'orgexpident' || h.includes('Org Expedidor')),
+                    dtexp: headers.findIndex(h => h.includes('data expedição') || h.includes('data de expedição')),
+                    endereco: headers.findIndex(h => h.includes('endereco') || h === 'endereço'),
+                    bairro: headers.findIndex(h => h === 'bairro'),
+                    cidade: headers.findIndex(h => h === 'cidade'),
+                    uf: headers.findIndex(h => h === 'uf' || h === 'estado'),
+                    cep: headers.findIndex(h => h === 'cep')
+                };
+            }
+
+            /**
+             * Valida se os campos obrigatórios estão presentes.
+             * @param {Object} indices - Índices das colunas.
+             * @returns {boolean}
+             */
+            validateRequiredFields(indices) {
+                return indices.matricula !== -1 && indices.turma !== -1 && indices.nome !== -1;
+            }
+
+            /**
+             * Separa o nome completo em primeiro nome e sobrenome.
+             * @param {string} fullName - Nome completo.
+             * @returns {Object} firstname e lastname.
+             */
+            splitName(fullName) {
+                if (!fullName) return { firstname: '', lastname: '' };
+                const parts = String(fullName).trim().split(' ');
+                return {
+                    firstname: parts[0],
+                    lastname: parts.slice(1).join(' ')
+                };
+            }
+
+            /**
+             * Formata o telefone para o padrão (XX) XXXXX-XXXX.
+             * @param {string} value - Telefone.
+             * @returns {string}
+             */
+            formatTelefone(value) {
+                // Redireciona para Utils.formatTelefone para evitar duplicidade
+                return Utils.formatTelefone(value);
+            }
+
+            /**
+             * Formata o CEP para o padrão XXXXX-XXX.
+             * @param {string} value - CEP.
+             * @returns {string}
+             */
+            formatCEP(value) {
+                // Redireciona para Utils.formatCEP para evitar duplicidade
+                return Utils.formatCEP(value);
+            }
+
+            /**
+             * Formata o campo sexo para 'Masculino' ou 'Feminino'.
+             * @param {string} value - Sexo.
+             * @returns {string}
+             */
+            formatSexo(value) {
+                // Redireciona para Utils.formatSexo para evitar duplicidade
+                return Utils.formatSexo(value);
+            }
+
+            /**
+             * Separa o nome completo em primeiro nome e sobrenome.
+             * @param {string} fullName - Nome completo.
+             * @returns {Object} firstname e lastname.
+             */
+            splitName(fullName) {
+                if (!fullName) return { firstname: '', lastname: '' };
+                const parts = String(fullName).trim().split(' ');
+                return {
+                    firstname: parts[0],
+                    lastname: parts.slice(1).join(' ')
+                };
+            }
+
+            /**
+             * Realiza o download do arquivo CSV transformado para importação no Moodle.
+             */
+            handleDownloadMoodleClick() {
+                if (!this.transformedContent) {
+                    Utils.showNotification('Não há dados transformados para baixar.', 'error');
+                    return;
+                }
+                const BOM = "\uFEFF";
+                const csvContentWithBOM = BOM + this.transformedContent;
+                const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
+                saveAs(blob, 'moodle_import.csv');
+                Utils.showNotification('Arquivo para importação no Moodle baixado com sucesso!');
+            }
+        }
+
+        // Classe responsável por controlar a interface do usuário e eventos
+        class UIController {
+            constructor() {
+                this.fileProcessor = new FileProcessor();
+                this.initializeEventListeners();
+                this.setupAccessibility();
+            }
+
+            /**
+             * Inicializa os listeners de eventos da interface.
+             */
+            initializeEventListeners() {
+                // File Input handling
+                this.setupFileInputHandlers();
+                
+                // Field Selection handling
+                this.setupFieldSelectionHandlers();
+                
+                // Button handlers
+                this.setupButtonHandlers();
+            }
+
+            /**
+             * Configura atributos de acessibilidade e instruções para o usuário.
+             */
+            setupAccessibility() {
+                // Adicionar atributos ARIA e roles apropriados
+                const fileInput = document.getElementById('fileInput');
+                fileInput.setAttribute('aria-label', 'Selecione um arquivo Excel ou CSV');
+                
+                // Adicionar instruções de acessibilidade
+                const instructions = document.createElement('p');
+                instructions.className = 'visually-hidden';
+                instructions.id = 'file-instructions';
+                instructions.textContent = 'Pressione espaço ou enter para abrir o seletor de arquivos';
+                document.querySelector('.file-input-container').appendChild(instructions);
+                fileInput.setAttribute('aria-describedby', 'file-instructions');
+            }
+
+            /**
+             * Configura os handlers para seleção de arquivo e drag-and-drop.
+             */
+            setupFileInputHandlers() {
+                const fileInput = document.getElementById('fileInput');
+                const dropZone = document.querySelector('.file-input-label');
+
+                // Manipuladores de drag and drop
+                this.setupDragAndDrop(dropZone, fileInput);
+
+                // Manipulador de seleção de arquivo
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length) {
+                        this.handleFileSelect(e.target.files[0]);
+                    }
+                });
+            }
+
+            /**
+             * Configura os eventos de drag-and-drop para o input de arquivo.
+             * @param {HTMLElement} dropZone - Área de drop.
+             * @param {HTMLElement} fileInput - Input de arquivo.
+             */
+            setupDragAndDrop(dropZone, fileInput) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => {
+                        dropZone.classList.add('border-primary');
+                    });
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => {
+                        dropZone.classList.remove('border-primary');
+                    });
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files.length) {
+                        fileInput.files = files;
+                        this.handleFileSelect(files[0]);
+                    }
+                });
+            }
+
+            /**
+             * Configura os handlers para seleção de campos (checkboxes).
+             */
+            setupFieldSelectionHandlers() {
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const fieldCheckboxes = document.querySelectorAll(
+                    '#fieldSelection .field-options input[type="checkbox"]:not(:disabled)'
+                );
+
+                selectAllCheckbox.addEventListener('change', () => {
+                    fieldCheckboxes.forEach(checkbox => {
+                        checkbox.checked = selectAllCheckbox.checked;
+                    });
+                });
+
+                fieldCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        selectAllCheckbox.checked = Array.from(fieldCheckboxes)
+                            .every(cb => cb.checked);
+                    });
+                });
+            }
+
+            /**
+             * Configura os handlers dos botões principais da interface.
+             */
+            setupButtonHandlers() {
+                const readBtn = document.getElementById('readBtn');
+                const transformBtn = document.getElementById('transformBtn');
+                const downloadBtn = document.getElementById('downloadBtn');
+                const backBtn = document.getElementById('backBtn');
+
+                readBtn.addEventListener('click', async () => {
+                    const selectedFields = Array.from(document.querySelectorAll('#fieldSelection .field-options input[type="checkbox"]:checked'))
+                        .map(cb => cb.value);
+
+                    if (selectedFields.length < 3) {
+                        Utils.showNotification('Selecione pelo menos os campos obrigatórios.', 'error');
+                        return;
+                    }
+
+                    if (!this.fileProcessor.selectedFile) {
+                        Utils.showNotification('Por favor, selecione um arquivo primeiro.', 'error');
+                        return;
+                    }
+
+                    try {
+                        readBtn.disabled = true;
+                        this.showLoadingState(readBtn);
+                        
+                        const success = await this.fileProcessor.processFile(this.fileProcessor.selectedFile);
+                        
+                        if (success) {
+                            document.getElementById('originalDataContainer').classList.remove('hide');
+                            document.getElementById('transformedDataContainer').classList.add('hide');
+                            document.getElementById('originalDataContainer').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } catch (error) {
+                        Utils.showNotification(error.message, 'error');
+                    } finally {
+                        this.hideLoadingState(readBtn);
+                        readBtn.disabled = false;
+                    }
+                });
+
+                transformBtn.addEventListener('click', () => {
+                    try {
+                        this.fileProcessor.transformData();
+                    } catch (error) {
+                        Utils.showNotification(error.message, 'error');
+                    }
+                });                downloadBtn.addEventListener('click', () => {
+                    this.fileProcessor.handleDownloadMoodleClick();
+                });
+
+                backBtn.addEventListener('click', () => {
+                    document.getElementById('originalDataContainer').classList.remove('hide');
+                    document.getElementById('transformedDataContainer').classList.add('hide');
+                });
+            }
+
+            /**
+             * Manipula a seleção de arquivo pelo usuário e exibe informações na interface.
+             * @param {File} file - Arquivo selecionado.
+             */
+            async handleFileSelect(file) {
+                const fileInfo = document.getElementById('file-info');
+                const fieldSelection = document.getElementById('fieldSelection');
+                
+                if (!file) return;
+
+                const isValidType = /\.(xlsx|xls|csv)$/i.test(file.name);
+                if (!isValidType) {
+                    Utils.showNotification(
+                        'Por favor, selecione um arquivo Excel (.xlsx, .xls) ou CSV',
+                        'error'
+                    );
+                    return;
+                }
+
+                this.fileProcessor.selectedFile = file;
+                fileInfo.textContent = `Arquivo selecionado: ${file.name}`;
+                fieldSelection.classList.remove('hidden');
+                document.getElementById('readBtn').disabled = false;
+            }
+
+            /**
+             * Manipula o clique no botão de leitura/processamento do arquivo.
+             */
+            async handleReadButtonClick() {
+                const readBtn = document.getElementById('readBtn');
+                if (!this.fileProcessor.selectedFile) {
+                    Utils.showNotification('Por favor, selecione um arquivo primeiro.', 'error');
+                    return;
+                }
+
+                try {
+                    readBtn.disabled = true;
+                    this.showLoadingState(readBtn);
+
+                    const success = await this.fileProcessor.processFile(
+                        this.fileProcessor.selectedFile
+                    );
+
+                    if (success) {
+                        document.getElementById('originalDataContainer')
+                            .scrollIntoView({ behavior: 'smooth' });
+                    }
+                } catch (error) {
+                    Utils.showNotification(error.message, 'error');
+                } finally {
+                    this.hideLoadingState(readBtn);
+                    readBtn.disabled = false;
+                }
+            }
+
+            /**
+             * Exibe estado de carregamento no botão.
+             * @param {HTMLElement} button - Botão alvo.
+             */
+            showLoadingState(button) {
+                button.innerHTML = `
+                    <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processando...
+                `;
+            }
+
+            /**
+             * Remove o estado de carregamento do botão.
+             * @param {HTMLElement} button - Botão alvo.
+             */
+            hideLoadingState(button) {
+                button.innerHTML = 'Processar Arquivo';
+            }
+
+            /**
+             * Manipula o clique no botão de transformação dos dados.
+             */
+            handleTransformButtonClick() {
+                try {
+                    const result = this.fileProcessor.transformData();
+                    if (result) {
+                        document.getElementById('originalDataContainer').classList.add('hide');
+                        document.getElementById('transformedDataContainer').classList.remove('hide');
+                    }
+                } catch (error) {
+                    Utils.showNotification(error.message, 'error');
+                }
+            }
+
+            /**
+             * Manipula o clique no botão de download do CSV.
+             */
+            handleDownloadButtonClick() {
+                if (!this.fileProcessor.transformedContent) {
+                    Utils.showNotification('Não há dados transformados para baixar.', 'error');
+                    return;
+                }
+
+                const BOM = "\uFEFF";
+                const csvContentWithBOM = BOM + this.fileProcessor.transformedContent;
+                
+                const blob = new Blob([csvContentWithBOM], {
+                    type: 'text/csv;charset=utf-8;'
+                });
+                
+                saveAs(blob, 'moodle_import.csv');
+                Utils.showNotification('Arquivo para importação no Moodle baixado com sucesso!');
+            }
+
+            /**
+             * Manipula o clique no botão de download para o Moodle.
+             */
+            handleDownloadMoodleClick() {
+                if (!this.fileProcessor.transformedContent) {
+                    Utils.showNotification('Não há dados transformados para baixar.', 'error');
+                    return;
+                }
+                const BOM = "\uFEFF";
+                const csvContentWithBOM = BOM + this.fileProcessor.transformedContent;
+                const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
+                saveAs(blob, 'moodle_import.csv');
+                Utils.showNotification('Arquivo para importação no Moodle baixado com sucesso!');
+            }
+
+            /**
+             * Manipula o clique no botão de voltar para os dados originais.
+             */
+            handleBackButtonClick() {
+                document.getElementById('transformedDataContainer').classList.add('hide');
+                document.getElementById('originalDataContainer').classList.remove('hide');
+            }
+        }
+
+        // Inicializa a aplicação ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            new UIController();
+        });
+    </script>
+</body>
+</html>
