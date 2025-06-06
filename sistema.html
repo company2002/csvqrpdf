@@ -356,6 +356,48 @@
             color: #666;
             margin-left: 10px;
         }
+
+        /* Estilos do modal de relatório */
+        #relatorioModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #relatorioModal > div {
+            background: white;
+            max-width: 600px;
+            width: 90vw;
+            padding: 30px 20px 20px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        #closeRelatorioModal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #dc3545;
+        }
+
+        #relatorioContent {
+            max-height: 55vh;
+            overflow: auto;
+            font-size: 1rem;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -423,6 +465,15 @@
 
         <input type="file" id="batchPdfInput" class="file-input" accept=".pdf" multiple style="display:none">
         <input type="file" id="batchQrInput" class="file-input" accept="image/*" multiple style="display:none">
+    </div>
+
+    <!-- Adiciona modal de relatório ao final do body -->
+    <div id="relatorioModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:white;max-width:600px;width:90vw;padding:30px 20px 20px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.25);position:relative;">
+        <button id="closeRelatorioModal" style="position:absolute;top:10px;right:15px;font-size:1.5rem;background:none;border:none;cursor:pointer;color:#dc3545;">×</button>
+        <h2 style="color:#667eea;margin-bottom:10px;">Relatório do Processamento em Lote</h2>
+        <div id="relatorioContent" style="max-height:55vh;overflow:auto;font-size:1rem;color:#333;"></div>
+      </div>
     </div>
 
     <script>
@@ -859,51 +910,89 @@
                 saveBatchButton.disabled = true;
                 saveBatchButton.innerHTML = '<div class="loading"></div> Gerando ZIP...';
 
+                function normalizeName(str) {
+                    return str
+                        .toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos corretamente
+                        .replace(/[^a-z0-9]/gi, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                }
+
+                // Relatório detalhado
+                let relatorio = {
+                    pdfs: this.batchPdfFiles.map(f => f.name),
+                    qrs: this.batchQrFiles.map(f => f.name),
+                    pares: [],
+                    pdfsSemQr: [],
+                    qrsSemPdf: []
+                };
+
                 try {
                     const zip = new JSZip();
-                    // Usa o primeiro overlay como modelo
                     const qrOverlay = this.qrOverlays[0];
                     const overlayPage = qrOverlay.page || 1;
-                    // Pega o canvas do preview para calcular proporções
                     const canvas = document.querySelector('.pdf-canvas');
                     const pageWidth = canvas.width;
                     const pageHeight = canvas.height;
-                    // Calcula as posições relativas (em porcentagem)
                     const relativeX = parseFloat(qrOverlay.element.style.left) / pageWidth;
                     const relativeY = parseFloat(qrOverlay.element.style.top) / pageHeight;
                     const relativeWidth = parseFloat(qrOverlay.element.style.width) / pageWidth;
                     const relativeHeight = parseFloat(qrOverlay.element.style.height) / pageHeight;
 
-                    for (let i = 0; i < this.batchPdfFiles.length; i++) {
-                        try {
-                            const pdfBytes = await this.batchPdfFiles[i].arrayBuffer();
-                            const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-                            const qrBlob = this.batchQrFiles[i] || this.qrBlob; // Usa o QR atual se não houver correspondente
-                            const qrBytes = await qrBlob.arrayBuffer();
-                            const qrImage = await pdfDoc.embedPng(qrBytes);
+                    const pdfMap = {};
+                    this.batchPdfFiles.forEach(pdf => {
+                        const name = normalizeName(pdf.name.replace(/\.pdf$/i, ''));
+                        pdfMap[name] = pdf;
+                    });
+                    const qrMap = {};
+                    this.batchQrFiles.forEach(qr => {
+                        const name = normalizeName(qr.name.replace(/\.(png|jpg|jpeg)$/i, ''));
+                        qrMap[name] = qr;
+                    });
 
-                            // Pega a página correta (igual ao preview)
+                    const matched = [];
+                    const unmatchedPdfs = [];
+                    const unmatchedQrs = [];
+
+                    for (const pdfName in pdfMap) {
+                        if (qrMap[pdfName]) {
+                            matched.push({ pdf: pdfMap[pdfName], qr: qrMap[pdfName], name: pdfName });
+                            relatorio.pares.push({ pdf: pdfMap[pdfName].name, qr: qrMap[pdfName].name });
+                        } else {
+                            unmatchedPdfs.push(pdfMap[pdfName].name);
+                            relatorio.pdfsSemQr.push(pdfMap[pdfName].name);
+                        }
+                    }
+                    for (const qrName in qrMap) {
+                        if (!pdfMap[qrName]) {
+                            unmatchedQrs.push(qrMap[qrName].name);
+                            relatorio.qrsSemPdf.push(qrMap[qrName].name);
+                        }
+                    }
+
+                    for (let i = 0; i < matched.length; i++) {
+                        try {
+                            const { pdf, qr, name } = matched[i];
+                            const pdfBytes = await pdf.arrayBuffer();
+                            const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                            const qrBytes = await qr.arrayBuffer();
+                            const qrImage = await pdfDoc.embedPng(qrBytes);
                             const pageIndex = Math.max(0, overlayPage - 1);
                             const page = pdfDoc.getPage(pageIndex);
                             const { width: pdfWidth, height: pdfHeight } = page.getSize();
-
-                            // Aplica as posições relativas ao PDF atual
                             const x = pdfWidth * relativeX;
-                            const y = pdfHeight * (1 - relativeY - relativeHeight); // Inverte Y pois PDF usa coordenadas de baixo para cima
+                            const y = pdfHeight * (1 - relativeY - relativeHeight);
                             const width = pdfWidth * relativeWidth;
                             const height = pdfHeight * relativeHeight;
-
                             page.drawImage(qrImage, { x, y, width, height });
                             const newPdfBytes = await pdfDoc.save();
-
-                            const fileName = this.batchPdfFiles[i].name.replace('.pdf', '_com_qrcode.pdf');
+                            const fileName = pdf.name.replace(/\.pdf$/i, '_com_qrcode.pdf');
                             zip.file(fileName, newPdfBytes);
-
-                            // Atualiza o progresso
-                            saveBatchButton.innerHTML = `<div class="loading"></div> Processando ${i + 1}/${this.batchPdfFiles.length}...`;
+                            saveBatchButton.innerHTML = `<div class=\"loading\"></div> Processando ${i + 1}/${matched.length}...`;
                         } catch (err) {
-                            console.error(`Erro ao processar arquivo ${i + 1}:`, err);
-                            this.showToast(`Erro ao processar arquivo ${i + 1}: ${err.message}`, 'error');
+                            console.error(`Erro ao processar par ${i + 1}:`, err);
+                            this.showToast(`Erro ao processar par ${i + 1}: ${err.message}`, 'error');
                         }
                     }
 
@@ -917,7 +1006,33 @@
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
 
-                    this.showToast('ZIP gerado com sucesso!', 'success');
+                    // Relatório HTML
+                    let html = '';
+                    html += `<b>PDFs carregados:</b><ul>` + relatorio.pdfs.map(n => `<li>${n}</li>`).join('') + '</ul>';
+                    html += `<b>QR Codes carregados:</b><ul>` + relatorio.qrs.map(n => `<li>${n}</li>`).join('') + '</ul>';
+                    html += `<b>Pares encontrados:</b><ul>` + (relatorio.pares.length ? relatorio.pares.map(p => `<li>PDF: <b>${p.pdf}</b> <br>QR: <b>${p.qr}</b></li>`).join('') : '<li>Nenhum par encontrado</li>') + '</ul>';
+                    html += `<b>PDFs sem QR correspondente:</b><ul>` + (relatorio.pdfsSemQr.length ? relatorio.pdfsSemQr.map(n => `<li>${n}</li>`).join('') : '<li>Nenhum</li>') + '</ul>';
+                    html += `<b>QR Codes sem PDF correspondente:</b><ul>` + (relatorio.qrsSemPdf.length ? relatorio.qrsSemPdf.map(n => `<li>${n}</li>`).join('') : '<li>Nenhum</li>') + '</ul>';
+
+                    document.getElementById('relatorioContent').innerHTML = html;
+                    document.getElementById('relatorioModal').style.display = 'flex';
+
+                    document.getElementById('closeRelatorioModal').onclick = () => {
+                        document.getElementById('relatorioModal').style.display = 'none';
+                    };
+
+                    let msg = '';
+                    if (unmatchedPdfs.length > 0) {
+                        msg += `PDF(s) sem QR correspondente: ${unmatchedPdfs.join(', ')}. `;
+                    }
+                    if (unmatchedQrs.length > 0) {
+                        msg += `QR(s) sem PDF correspondente: ${unmatchedQrs.join(', ')}. `;
+                    }
+                    if (msg) {
+                        this.showToast(msg, 'error');
+                    } else {
+                        this.showToast('ZIP gerado com sucesso!', 'success');
+                    }
                 } catch (error) {
                     console.error('Erro ao gerar ZIP:', error);
                     this.showToast('Erro ao gerar arquivo ZIP', 'error');
